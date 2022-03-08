@@ -1,16 +1,16 @@
 # TODO: implement simple fetch example
 
 import asyncio
-
-from gatered.client import BaseClient
+from gatered import Client, get_post_comments
 
 
 async def fetch_submissions():
-    client = BaseClient()
+    client = Client()
 
     async with client:
         # res = await client.get_post_comments("t97ji9")
-        res = await client.get_posts('Eldenring')
+        # res = await client.get_posts('Eldenring')
+        res = await get_post_comments(client, "t97ji9")
         print(res)
 
 

@@ -12,10 +12,11 @@ log = logging.getLogger(__name__)
 RequestType: TypeAlias = "Coroutine[None, None, Optional[T]]"
 
 
-class BaseClient:
+class Client:
     """
-    The (Raw) Base Client that interacts with the Reddit gateway API.
-    For proxy support, read: https://www.python-httpx.org/advanced/#http-proxying
+    The Client that interacts with the Reddit gateway API and returns raw JSON.
+    Httpx options can be passed in when creating the client such as proxies:
+    https://www.python-httpx.org/api/#asyncclient
     """
 
     _SUBREDDIT_SORT = "hot"
@@ -39,15 +40,16 @@ class BaseClient:
 
     def __init__(self, **options: Any):
         self._client: Optional[httpx.AsyncClient] = None
-        self._x_reddit_loid: Optional[str] = None
-        self._x_reddit_session: Optional[str] = None
-        self.proxies: Optional[str] = options.get("proxies")
+        self._x_reddit_loid: str = "0"
+        self._x_reddit_session: str = "0"
+        self.options = options
 
     async def __aenter__(self):
         self._client = httpx.AsyncClient(
             base_url=self._BASE_URL,
             headers=self._DEFAULT_HEADER,
             params=self._DEFAULT_PARAMS,
+            **self.options,
         )
         return self
 
@@ -61,13 +63,12 @@ class BaseClient:
         **kwargs: Any,
     ) -> Optional[Any]:
         kwargs["headers"] = kwargs.get("headers", {})
-        if self._x_reddit_loid:
-            kwargs["headers"].update(
-                {
-                    "x-reddit-loid": self._x_reddit_loid,
-                    "x-reddit-session": self._x_reddit_session,
-                }
-            )
+        kwargs["headers"].update(
+            {
+                "x-reddit-loid": self._x_reddit_loid,
+                "x-reddit-session": self._x_reddit_session,
+            }
+        )
 
         for tries in range(5):
             r = await self._client.request(method, url_path, **kwargs)
@@ -77,12 +78,9 @@ class BaseClient:
 
             # Successful returning text/json
             if 200 <= r.status_code < 300:
-                r_loid = r.headers.get("x-reddit-loid", "")
-                r_session = r.headers.get("x-reddit-session", "")
-
-                if not self._x_reddit_loid:
-                    self._x_reddit_loid = r_loid
-                    self._x_reddit_session = r_session
+                if self._x_reddit_loid == "0":
+                    self._x_reddit_loid = r.headers.get("x-reddit-loid", "")
+                    self._x_reddit_session = r.headers.get("x-reddit-session", "")
 
                 return r.json()
 
@@ -169,7 +167,9 @@ class BaseClient:
             params["sort"] = sort
 
         return await self._get(
-            f"/postcomments/{submission_id}", params=params, **kwargs
+            f"/postcomments/{submission_id}",
+            params=params,
+            **kwargs,
         )
 
     async def get_posts(
@@ -183,6 +183,7 @@ class BaseClient:
     ):
         """
         Get submissions list from a subreddit.
+        Note: This also includes ads posts.
 
         Parameters
         ----------
@@ -213,12 +214,4 @@ class BaseClient:
             params["after"] = after
             params["dist"] = dist
 
-        # Perform request and filter out ads
-        res = await self._get(
-            f"/subreddits/{subreddit_name}",
-            params=params,
-            **kwargs,
-        )
-        return [
-            res["posts"].get(i) for i in res["postIds"] if not i.startswith("t3_z=")
-        ]
+        return await self._get(f"/subreddits/{subreddit_name}", params=params, **kwargs)

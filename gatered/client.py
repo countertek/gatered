@@ -44,7 +44,7 @@ class BaseClient:
         self.proxies: Optional[str] = options.get("proxies")
 
     async def __aenter__(self):
-        self._client = httpx.Client(
+        self._client = httpx.AsyncClient(
             base_url=self._BASE_URL,
             headers=self._DEFAULT_HEADER,
             params=self._DEFAULT_PARAMS,
@@ -131,25 +131,22 @@ class BaseClient:
         Returns raw comments list.
         """
         payload = {"token": token}
-        params = {
-            "emotes_as_images": "true",
-            **self.default_params,
-        }
+        params = {"emotes_as_images": "true"}
         return await self._post(
-            f"{self._BASE_URL}/morecomments/{submission_id}",
+            f"/morecomments/{submission_id}",
             params=params,
             json=payload,
             **kwargs,
         )
 
-    async def get_submission(
+    async def get_post_comments(
         self,
         submission_id: str,
         sort: Optional[str] = None,
         **kwargs: Any,
     ):
         """
-        Get submission and its details (comments and its related info).
+        Get post and its comments (comments and its related info).
 
         Parameters
         ----------
@@ -163,7 +160,6 @@ class BaseClient:
         """
         params = {
             "emotes_as_images": "true",
-            **self.default_params,
             "hasSortParam": "false",
             "include_categories": "true",
             "onOtherDiscussions": "false",
@@ -173,10 +169,10 @@ class BaseClient:
             params["sort"] = sort
 
         return await self._get(
-            f"{self._BASE_URL}/postcomments/{submission_id}", params=params, **kwargs
+            f"/postcomments/{submission_id}", params=params, **kwargs
         )
 
-    async def get_submissions(
+    async def get_posts(
         self,
         subreddit_name: str,
         sort: Optional[str] = _SUBREDDIT_SORT,
@@ -204,10 +200,7 @@ class BaseClient:
 
         Returns raw submissions list.
         """
-        params = {
-            **self.default_params,
-            "layout": "classic",
-        }
+        params = {"layout": "classic"}
         # Check for sort
         if sort in {"hot", "new", "top", "rising"}:
             params["sort"] = sort
@@ -222,7 +215,7 @@ class BaseClient:
 
         # Perform request and filter out ads
         res = await self._get(
-            f"{self._BASE_URL}/subreddits/{subreddit_name}",
+            f"/subreddits/{subreddit_name}",
             params=params,
             **kwargs,
         )

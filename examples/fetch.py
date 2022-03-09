@@ -8,10 +8,12 @@ async def fetch_submissions():
     client = Client()
 
     async with client:
-        # res = await client.get_post_comments("t97ji9")
+        # res = await client.get_post_comments("t3_t97ji9")
         # res = await client.get_posts('Eldenring')
-        res = await get_post_comments(client, "t97ji9")
-        print(res)
+        res = await get_post_comments(client, "t3_t97ji9", all_comments=True)
+        print(res['post'])
+        print(len(res['comments']))
+
 
 
 if __name__ == "__main__":

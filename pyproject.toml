@@ -9,7 +9,6 @@ repository = "https://github.com/CounterTek/gatered"
 keywords = ["reddit", "reddit api"]
 classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -20,7 +19,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 httpx = {extras = ["http2"], version = "^0.22.0"}
 python-dotenv = "^0.19.2"
 aiometer = "^0.3.0"

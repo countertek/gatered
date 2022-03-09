@@ -1,4 +1,15 @@
 [[package]]
+name = "aiometer"
+version = "0.3.0"
+description = "A Python concurrency scheduling library, compatible with asyncio and trio"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+anyio = ">=3.2,<4.0"
+
+[[package]]
 name = "anyio"
 version = "3.5.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -344,9 +355,13 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "507921dc8122820a3c3609c1b08fc92446ae1d208156f7943dca8a2693a8bfa6"
+content-hash = "acfdd3995b0f752ad11101c0b1d33e325557ba49851eb912cd96711cbd80bdd5"
 
 [metadata.files]
+aiometer = [
+    {file = "aiometer-0.3.0-py3-none-any.whl", hash = "sha256:1c3c6bb774d87105061a10c5e1eab5d70debae72d8a1c1ae0ebc84fb9bc172cc"},
+    {file = "aiometer-0.3.0.tar.gz", hash = "sha256:55df5af97ca91b10bcb92d6467cfb1cdfff2803733ea8078f7d7459ab28cac30"},
+]
 anyio = [
     {file = "anyio-3.5.0-py3-none-any.whl", hash = "sha256:b5fa16c5ff93fa1046f2eeb5bbff2dad4d3514d6cda61d02816dba34fa8c3c2e"},
     {file = "anyio-3.5.0.tar.gz", hash = "sha256:a0aeffe2fb1fdf374a8e4b471444f0f3ac4fb9f5a5b542b48824475e0042a5a6"},

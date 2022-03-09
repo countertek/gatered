@@ -1,6 +1,7 @@
 from typing import Any, Optional
+from functools import partial
 from itertools import chain
-import asyncio
+import aiometer
 
 from gatered.client import Client
 
@@ -10,6 +11,8 @@ async def get_post_comments(
     submission_id: str,
     sort: Optional[str] = None,
     all_comments: bool = False,
+    max_at_once: int = 8,
+    max_per_second: int = 4,
     **kwargs: Any,
 ):
     """
@@ -23,10 +26,14 @@ async def get_post_comments(
     submission_id: :class:`str`
         The Submission id (starts with `t3_`).
     sort: Optional[:class:`str`]
-        Option to sort the comments of the submission, default to None (best)
+        Option to sort the comments of the submission, default to `None` (best)
         Available options: `top`, `new`, `controversial`, `old`, `qa`.
     all_comments: Optional[:class:`bool`]
         Set this to `True` to also get all nested comments. Default to `False`.
+    max_at_once: Optional[:class:`int`]
+        Limits the maximum number of concurrently requests for all comments. Default to 8.
+    max_per_second: Optional[:class:`int`]
+        Limits the number of requests spawned per second. Default to 4.
 
     Returns `post` (submission) and its `comments` as list
     """
@@ -39,11 +46,15 @@ async def get_post_comments(
 
     if all_comments and more_comments:
         while more_comments:
-            multiple_requests = [
-                client.get_more_comments(submission_id, mc["token"], **kwargs)
+            reqs = [
+                partial(client.get_more_comments, submission_id, mc["token"], **kwargs)
                 for mc in more_comments
             ]
-            aggr_res = await asyncio.gather(*multiple_requests)
+            aggr_res = await aiometer.run_all(
+                reqs,
+                max_at_once=max_at_once,
+                max_per_second=max_per_second,
+            )
 
             # Add comments to comments
             comments += list(
@@ -108,6 +119,4 @@ async def get_posts(
         "sort": raw_json.get("listingSort"),
         "token": raw_json.get("token"),
         "dist": raw_json.get("dist"),
-        "_x-reddit-loid": raw_json.get("_x-reddit-loid"),
-        "_x-reddit-session": raw_json.get("_x-reddit-session"),
     }

@@ -3,7 +3,6 @@ name = "gatered"
 version = "0.1.4"
 description = "Reddit Gateway API Library"
 authors = ["Darwin <darekaze@gmail.com>"]
-requires-python = ">=3.7"
 license = "Apache"
 readme = "README.md"
 repository = "https://github.com/CounterTek/gatered"
@@ -21,7 +20,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 httpx = {extras = ["http2"], version = "^0.22.0"}
 python-dotenv = "^0.19.2"
 aiometer = "^0.3.0"

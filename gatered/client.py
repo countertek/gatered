@@ -1,6 +1,5 @@
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, TypeVar, Callable, Coroutine
 from typing_extensions import TypeAlias
-from collections.abc import Callable, Coroutine
 from functools import partialmethod
 
 import asyncio

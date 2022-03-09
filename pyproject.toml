@@ -2,7 +2,22 @@
 name = "gatered"
 version = "0.1.0"
 description = "Reddit Gateway API Library"
-authors = ["Darwin <@darekaze>"]
+authors = ["Darwin <darekaze@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/CounterTek/gatered"
+keywords = ["reddit", "reddit api"]
+classifiers = [
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+]
+packages = [
+    { include = "gatered"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"

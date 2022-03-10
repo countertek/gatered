@@ -12,4 +12,4 @@ from httpx import RequestError, HTTPStatusError
 
 from .client import Client
 from .pushshift import PushShiftAPI
-from .func import get_post_comments
+from .func import get_post_comments, get_posts, get_pushshift_posts

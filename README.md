@@ -37,5 +37,6 @@ TBD
 - [x] Publish on PyPI w/ portry
 - [x] Handle pagination through async generators
 - [ ] Refine documentation in README and add examples
+- [ ] Make an example sandbox in replit
 - [ ] Prepare test cases
 

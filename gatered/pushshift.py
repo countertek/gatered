@@ -2,7 +2,7 @@ from typing import Any, Optional, TypeVar, Coroutine
 from typing_extensions import TypeAlias
 
 from asyncio import sleep
-from httpx import AsyncClient
+from httpx import AsyncClient, Timeout
 import logging
 
 T = TypeVar("T")
@@ -30,6 +30,7 @@ class PushShiftAPI:
         "Referer": "https://redditsearch.io/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0",
     }
+    _DEFAULT_OPTIONS = {"timeout": Timeout(10, read=30)}
     _DEFAULT_SORT = "desc"
     _DEFAULT_SIZE = 100
 
@@ -37,7 +38,7 @@ class PushShiftAPI:
         self._client: Optional[AsyncClient] = None
         self._x_reddit_loid: str = "0"
         self._x_reddit_session: str = "0"
-        self.options = options
+        self.options = {**self._DEFAULT_OPTIONS, **options}
 
     async def __aenter__(self):
         self._client = AsyncClient(

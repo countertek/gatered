@@ -43,7 +43,6 @@ class PushShiftAPI:
         self._client = AsyncClient(
             base_url=self._BASE_URL,
             headers=self._DEFAULT_HEADER,
-            params=self._DEFAULT_PARAMS,
             **self.options,
         )
         return self
@@ -87,6 +86,7 @@ class PushShiftAPI:
         after: int = None,
         sort: str = _DEFAULT_SORT,
         size: int = _DEFAULT_SIZE,
+        **kwargs: Any,
     ):
         """
         Get submissions list from a subreddit.
@@ -109,12 +109,13 @@ class PushShiftAPI:
         """
         res = await self._get(
             "/reddit/search/submission",
-            {
+            params={
                 "after": after,
                 "before": before,
                 "subreddit": subreddit_name,
                 "sort": sort,
                 "size": size,
             },
+            **kwargs,
         )
         return res["data"]

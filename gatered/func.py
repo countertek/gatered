@@ -36,7 +36,7 @@ async def get_posts(
     sort: Optional[str] = "hot",
     t: Optional[str] = "day",
     page_limit: Optional[int] = 4,
-    req_delay: int = 1,
+    req_delay: int = 0.5,
     httpx_options: Dict[str, Any] = {},
 ):
     """
@@ -56,7 +56,7 @@ async def get_posts(
         Set a request limit for pages to fetch. Disable this limit by passing `None`.
         Default to 4 (which will fetch 100 posts)
     req_delay: Optional[:class:`int`]
-        Set delay between each page request. Set 0 to disable it. Default to 1.
+        Set delay between each page request. Set 0 to disable it. Default to 0.5.
 
     Returns an async generator. Use async for loop to handle page results.
     """

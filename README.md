@@ -33,12 +33,11 @@ Alternatively you can directly use `Client` and `PushShiftAPI` classes to implem
 
 Check the `examples` folder to learn more.
 
----
 ## Documentation
 
 <a href="..\gatered\func.py#L12"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `get_post_comments`
+### <kbd>function</kbd> `get_post_comments`
 
 ```python
 get_post_comments(
@@ -52,19 +51,18 @@ Helper function to get submission and its comments. If `all_comments` is `True`,
 
 Returns `post` (submission) and its `comments` as list.
 
-Parameters 
-----------
+#### Parameters 
+
 submission_id: :class:`str`  
 The Submission id (starts with `t3_`). 
 
 all_comments: Optional[:class:`bool`]  
 Set this to `True` to also get all nested comments. Default to `False`. 
 
----
 
 <a href="..\gatered\func.py#L34"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `get_posts`
+### <kbd>function</kbd> `get_posts`
 
 ```python
 get_posts(
@@ -81,8 +79,8 @@ Async Generator to get submissions page by page.
 
 Returns an async generator. Use async for loop to handle page results.
 
-Parameters 
-----------
+#### Parameters
+
 subreddit_name: :class:`str`  
 Name of the subreddit. 
 
@@ -100,11 +98,10 @@ Set a request limit for pages to fetch. Disable this limit by passing `None`.  D
 req_delay: Optional[:class:`int`]  
 Set delay between each page request. Set 0 to disable it. Default to 0.5. 
 
----
 
 <a href="..\gatered\func.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `get_pushshift_posts`
+### <kbd>function</kbd> `get_pushshift_posts`
 
 ```python
 get_pushshift_posts(
@@ -120,8 +117,8 @@ Async Generator to get submissions by time range.
 
 Returns an async generator. Use async for loop to handle page results. 
 
-Parameters 
-----------
+#### Parameters
+
 subreddit_name: :class:`str`  
 Name of the subreddit. 
 
@@ -150,8 +147,6 @@ Httpx options can be passed in when creating the client such as proxies: https:/
 __init__(**options: Any)
 ```
 
----
-
 <a href="..\gatered\client.py#L220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_post_comments`
@@ -171,8 +166,8 @@ Get submission and its comments. If `all_comments` is `True`, it will fetch all 
 
 Returns `post` (submission) and its `comments` as list.
 
-Parameters 
-----------
+#### Parameters 
+
 submission_id: :class:`str`  
 The Submission id (starts with `t3_`).
 
@@ -188,9 +183,6 @@ Limits the maximum number of concurrently requests for all comments. Default to 
 max_per_second: Optional[:class:`int`]  
 Limits the number of requests spawned per second. Default to 4. 
 
-
-
----
 
 <a href="..\gatered\client.py#L285"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
@@ -211,8 +203,8 @@ Get submissions list from a subreddit, with ads filtered. This provides flexibil
 
 Returns `subreddit` and its `posts` (submissions) as list, as well as `token` and `dist` for paginations. 
 
-Parameters 
-----------
+#### Parameters 
+
 subreddit_name: :class:`str`  
 The Subreddit name. 
 
@@ -242,8 +234,6 @@ This acts as a helper to fetch past submissions based on time range (which is no
 __init__(**options: Any)
 ```
 
----
-
 <a href="..\gatered\pushshift.py#L83"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_posts`
@@ -263,8 +253,8 @@ Get submissions list from a subreddit.
 
 Returns a list of submissions. 
 
-Parameters 
----------- 
+#### Parameters 
+
 subreddit_name: :class:`str`  
 The Subreddit name. 
 

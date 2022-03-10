@@ -1,9 +1,11 @@
 from typing import Any, Optional, TypeVar, Callable, Coroutine
 from typing_extensions import TypeAlias
-from functools import partialmethod
+from functools import partial, partialmethod
+from itertools import chain
 
-import asyncio
-import httpx
+from asyncio import sleep
+from aiometer import run_all
+from httpx import AsyncClient
 import logging
 
 T = TypeVar("T")
@@ -38,13 +40,13 @@ class Client:
     }
 
     def __init__(self, **options: Any):
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: Optional[AsyncClient] = None
         self._x_reddit_loid: str = "0"
         self._x_reddit_session: str = "0"
         self.options = options
 
     async def __aenter__(self):
-        self._client = httpx.AsyncClient(
+        self._client = AsyncClient(
             base_url=self._BASE_URL,
             headers=self._DEFAULT_HEADER,
             params=self._DEFAULT_PARAMS,
@@ -87,14 +89,14 @@ class Client:
             elif r.status == 429:
                 log.warning("Rate limited!!")
                 try:
-                    await asyncio.sleep(float(r.headers["X-Retry-After"]))
+                    await sleep(float(r.headers["X-Retry-After"]))
                 except KeyError:
-                    await asyncio.sleep(30 * tries)
+                    await sleep(30 * tries)
                 continue
 
             # we've received a 500, 502 or 504, an unconditional retry
             elif r.status in {500, 502, 504}:
-                await asyncio.sleep(tries * 5)
+                await sleep(tries * 5)
                 continue
 
             # then usual error cases - 403, 404 ...
@@ -109,7 +111,7 @@ class Client:
 
     # -- Request endpoints impl. --
 
-    async def get_more_comments(
+    async def raw_get_more_comments(
         self,
         submission_id: str,
         token: str,
@@ -136,7 +138,7 @@ class Client:
             **kwargs,
         )
 
-    async def get_post_comments(
+    async def raw_get_post_comments(
         self,
         submission_id: str,
         sort: Optional[str] = None,
@@ -171,7 +173,7 @@ class Client:
             **kwargs,
         )
 
-    async def get_posts(
+    async def raw_get_posts(
         self,
         subreddit_name: str,
         sort: Optional[str] = _SUBREDDIT_SORT,
@@ -215,112 +217,118 @@ class Client:
 
         return await self._get(f"/subreddits/{subreddit_name}", params=params, **kwargs)
 
+    async def get_post_comments(
+        self,
+        submission_id: str,
+        sort: Optional[str] = None,
+        all_comments: bool = False,
+        max_at_once: int = 8,
+        max_per_second: int = 4,
+        **kwargs: Any,
+    ):
+        """
+        Get submission and its comments.
+        If `all_comments` is `True`, it will fetch all the comments that are nested by reddit.
 
-class PushShiftAPI:
-    """
-    The Client that interacts with the PushShift API and returns raw JSON.
-    Httpx options can be passed in when creating the client.
+        Parameters
+        ----------
+        submission_id: :class:`str`
+            The Submission id (starts with `t3_`).
+        sort: Optional[:class:`str`]
+            Option to sort the comments of the submission, default to `None` (best)
+            Available options: `top`, `new`, `controversial`, `old`, `qa`.
+        all_comments: Optional[:class:`bool`]
+            Set this to `True` to also get all nested comments. Default to `False`.
+        max_at_once: Optional[:class:`int`]
+            Limits the maximum number of concurrently requests for all comments. Default to 8.
+        max_per_second: Optional[:class:`int`]
+            Limits the number of requests spawned per second. Default to 4.
 
-    This acts as a helper to fetch past submissions based on time range (which is not provided by reddit).
-    To get the comments, it's recommended to use offical Gateway API as source.
-    """
+        Returns `post` (submission) and its `comments` as list
+        """
+        raw_json = await self.raw_get_post_comments(submission_id, sort, **kwargs)
 
-    _BASE_URL = "https://api.pushshift.io"
-    _DEFAULT_HEADER = {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Connection": "keep-alive",
-        "DNT": "1",
-        "Origin": "https://redditsearch.io/",
-        "Referer": "https://redditsearch.io/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0",
-    }
-    _DEFAULT_SORT = "desc"
-    _DEFAULT_SIZE = 100
+        post = raw_json["posts"].get(submission_id)
+        comments = list(raw_json["comments"].values())
 
-    def __init__(self, **options: Any):
-        self._client: Optional[httpx.AsyncClient] = None
-        self._x_reddit_loid: str = "0"
-        self._x_reddit_session: str = "0"
-        self.options = options
+        more_comments = list(raw_json["moreComments"].values())
 
-    async def __aenter__(self):
-        self._client = httpx.AsyncClient(
-            base_url=self._BASE_URL,
-            headers=self._DEFAULT_HEADER,
-            params=self._DEFAULT_PARAMS,
-            **self.options,
-        )
-        return self
+        if all_comments and more_comments:
+            while more_comments:
+                reqs = [
+                    partial(
+                        self.raw_get_more_comments, submission_id, mc["token"], **kwargs
+                    )
+                    for mc in more_comments
+                ]
+                aggr_res = await run_all(
+                    reqs,
+                    max_at_once=max_at_once,
+                    max_per_second=max_per_second,
+                )
 
-    async def __aexit__(self, exc_type, exc, tb):
-        await self._client.aclose()
+                # Add comments to comments
+                comments += list(
+                    chain.from_iterable(
+                        [list(res["comments"].values()) for res in aggr_res]
+                    )
+                )
+                # Extract more comments
+                more_comments = list(
+                    chain.from_iterable(
+                        [list(res["moreComments"].values()) for res in aggr_res]
+                    )
+                )
 
-    async def _get(self, url_path: str, **kwargs: Any) -> Optional[Any]:
-        for tries in range(1, 6):
-            r = await self._client.get(url_path, **kwargs)
-            log.debug(
-                f"GET {r.url} *{kwargs.get('data')}* has returned {r.status_code}"
-            )
-
-            # Successful returning json
-            if 200 <= r.status_code < 300:
-                return r.json()
-
-            # Rate limited and wait for a minute
-            elif r.status == 429:
-                log.warning("Rate limited!! Sleep for 60 secs")
-                await asyncio.sleep(60)
-                continue
-
-            # we've received a 500, 502 or 504, an unconditional retry
-            elif r.status in {500, 502, 504}:
-                await asyncio.sleep(tries * 5)
-                continue
-
-            # then usual error cases - 403, 404 ...
-            else:
-                r.raise_for_status()
-
-        # we've run out of retries, raise
-        r.raise_for_status()
+        return {"post": post, "comments": comments}
 
     async def get_posts(
         self,
         subreddit_name: str,
-        before: int = None,
-        after: int = None,
-        sort: str = _DEFAULT_SORT,
-        size: int = _DEFAULT_SIZE,
+        sort: Optional[str] = "hot",
+        t: Optional[str] = "day",
+        after: Optional[str] = None,
+        dist: Optional[int] = None,
+        **kwargs: Any,
     ):
         """
-        Get submissions list from a subreddit.
+        Get submissions list from a subreddit, with ads filtered.
+        This provides flexibility for you to handle pagninations by yourself.
 
         Parameters
         ----------
         subreddit_name: :class:`str`
             The Subreddit name.
-        before: Optional[:class:`int`]
-        after: Optional[:class:`int`]
-            Provide epoch time (without ms) to get posts from a time range.
-            Default to `None` to get latest posts.
         sort: Optional[:class:`str`]
-            Option to sort the submissions, default to `desc`
-            Available options: `asc`, `desc`
-        size: Optional[:class:`int`]
-            Size of list to fetch. Default to maximum of 100.
+            Option to sort the submissions, default to `hot`
+            Available options: `hot`, `new`, `top`, `rising`
+        t: Optional[:class:`str`]
+            Type for sorting submissions by `top`, default to `day`
+            Available options: `hour`, `day`, `week`, `month`, `year`, `all`
+        after: Optional[:class:`str`]
+        dist: Optional[:class:`str`]
+            Needed for pagnitions.
 
-        Returns submissions list.
+        Returns `subreddit` and its `posts` (submissions) as list, as well as `token` and `dist` for paginations.
         """
-        res = await self._get(
-            "/reddit/search/submission",
-            {
-                "after": after,
-                "before": before,
-                "subreddit": subreddit_name,
-                "sort": sort,
-                "size": size,
-            },
+        raw_json = await self.raw_get_posts(
+            subreddit_name, sort, t, after, dist, **kwargs
         )
-        return res["data"]
+
+        subreddit_info = {
+            **(list(raw_json["subreddits"].values())[0]),
+            **(list(raw_json["subredditAboutInfo"].values())[0]),
+        }
+        posts = [
+            raw_json["posts"].get(i)
+            for i in raw_json["postIds"]
+            if not i.startswith("t3_z=")
+        ]
+
+        return {
+            "subreddit": subreddit_info,
+            "posts": posts,
+            "sort": raw_json.get("listingSort"),
+            "token": raw_json.get("token"),
+            "dist": raw_json.get("dist"),
+        }

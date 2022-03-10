@@ -35,7 +35,7 @@ Check the `examples` folder to learn more.
 
 ## Documentation
 
-<a href="..\gatered\func.py#L12"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L12"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_post_comments`
 
@@ -60,7 +60,7 @@ all_comments: Optional[:class:`bool`]
 Set this to `True` to also get all nested comments. Default to `False`. 
 
 
-<a href="..\gatered\func.py#L34"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L34"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_posts`
 
@@ -99,7 +99,7 @@ req_delay: Optional[:class:`int`]
 Set delay between each page request. Set 0 to disable it. Default to 0.5. 
 
 
-<a href="..\gatered\func.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_pushshift_posts`
 
@@ -133,13 +133,13 @@ Set delay between each page request. Set 0 to disable it. Default to 0.5.
 
 ---
 
-<a href="..\gatered\client.py#L16"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/client.py#L16"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `Client`
 The Client that interacts with the Reddit gateway API and returns raw JSON.  
 Httpx options can be passed in when creating the client such as proxies: https://www.python-httpx.org/api/#asyncclient 
 
-<a href="..\gatered\client.py#L42"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/client.py#L42"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -147,7 +147,7 @@ Httpx options can be passed in when creating the client such as proxies: https:/
 __init__(**options: Any)
 ```
 
-<a href="..\gatered\client.py#L220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/client.py#L220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_post_comments`
 
@@ -184,7 +184,7 @@ max_per_second: Optional[:class:`int`]
 Limits the number of requests spawned per second. Default to 4. 
 
 
-<a href="..\gatered\client.py#L285"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/client.py#L285"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_posts`
 
@@ -219,14 +219,14 @@ Needed for pagnitions.
 
 ---
 
-<a href="..\gatered\pushshift.py#L13"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/pushshift.py#L13"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `PushShiftAPI`
 The Client that interacts with the PushShift API and returns raw JSON. Httpx options can be passed in when creating the client. 
 
 This acts as a helper to fetch past submissions based on time range (which is not provided by reddit). To get the comments, it's recommended to use offical Gateway API as source. 
 
-<a href="..\gatered\pushshift.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/pushshift.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -234,7 +234,7 @@ This acts as a helper to fetch past submissions based on time range (which is no
 __init__(**options: Any)
 ```
 
-<a href="..\gatered\pushshift.py#L83"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/pushshift.py#L83"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_posts`
 

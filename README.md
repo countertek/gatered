@@ -2,9 +2,11 @@
 
 Reddit Gateway API Library, w/ pushshift history support.
 
+[![Latest Version](https://img.shields.io/pypi/v/gatered.svg)](https://pypi.python.org/pypi/gatered)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/gatered)](https://pypi.python.org/pypi/gatered)
 [![CI](https://github.com/countertek/gatered/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/countertek/gatered/actions/workflows/ci.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
+[![GitHub license](https://img.shields.io/github/license/countertek/gatered)](https://github.com/countertek/gatered/blob/main/LICENSE)
 
 ## Introduction
 

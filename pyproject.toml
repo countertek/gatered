@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gatered"
-version = "0.2.1"
+version = "0.3.0"
 description = "Reddit Gateway API Library"
 authors = ["Darwin <darekaze@gmail.com>"]
 license = "Apache"

@@ -33,7 +33,9 @@ The library provides easy functions to get start fast:
 
 Alternatively you can directly use `Client` and `PushShiftAPI` classes to implement your own logics.
 
-Check the `examples` folder to learn more.
+Errors can be handled with either `RequestError` or `HTTPStatusError`, see [httpx exceptions](https://www.python-httpx.org/exceptions/) to learn more.
+
+See the `examples` folder to learn more.
 
 ## Documentation
 

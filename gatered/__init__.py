@@ -5,7 +5,7 @@ gatered
 A utils for interacting with Reddit Gateway API (Web API).
 """
 
-__version__ = "0.3.1"
+__version__ = "1.0.0"
 
 # Import error classes from httpx: https://www.python-httpx.org/exceptions/
 from httpx import RequestError, HTTPStatusError

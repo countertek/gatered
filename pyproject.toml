@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "gatered"
-version = "0.3.1"
+version = "1.0.0"
 description = "Reddit Gateway API Library"
 authors = ["Darwin <darekaze@gmail.com>"]
-license = "Apache"
+license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/CounterTek/gatered"
 keywords = ["reddit", "reddit api"]

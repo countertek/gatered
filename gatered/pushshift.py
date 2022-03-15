@@ -63,13 +63,13 @@ class PushShiftAPI:
                 return r.json()
 
             # Rate limited and wait for a minute
-            elif r.status == 429:
+            elif r.status_code == 429:
                 log.warning("Rate limited!! Sleep for 60 secs")
                 await sleep(60)
                 continue
 
             # we've received a 500, 502 or 504, an unconditional retry
-            elif r.status in {500, 502, 504}:
+            elif r.status_code in {500, 502, 504}:
                 await sleep(tries * 5)
                 continue
 

@@ -86,7 +86,7 @@ class Client:
                 return r.json()
 
             # Rate limited (this is not tested)
-            elif r.status == 429:
+            elif r.status_code == 429:
                 log.warning("Rate limited!!")
                 try:
                     await sleep(float(r.headers["X-Retry-After"]))
@@ -95,7 +95,7 @@ class Client:
                 continue
 
             # we've received a 500, 502 or 504, an unconditional retry
-            elif r.status in {500, 502, 504}:
+            elif r.status_code in {500, 502, 504}:
                 await sleep(tries * 5)
                 continue
 

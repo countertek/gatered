@@ -16,12 +16,12 @@ jobs:
       - name: Generate Changelog
         run: |
           VERSION=$(.github/hack/version.sh)
-          .github/hack/changelog.sh $VERSION > ${{ github.workspace }}-CHANGELOG.md
+          .github/hack/changelog.sh $VERSION > NEW-VERSION-CHANGELOG.md
 
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.md
+          body_path: NEW-VERSION-CHANGELOG.md
           files: "gatered-*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

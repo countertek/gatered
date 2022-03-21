@@ -29,6 +29,7 @@ poetry add gatered
 The library provides easy functions to get start fast:
 - `get_post_comments`
 - `get_posts`
+- `get_comments`
 - `get_pushshift_posts`
 
 Alternatively you can directly use `Client` and `PushShiftAPI` classes to implement your own logics.
@@ -39,7 +40,7 @@ See the `examples` folder to learn more.
 
 ## Documentation
 
-<a href="./gatered/func.py#L12"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L14"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_post_comments`
 
@@ -64,7 +65,7 @@ all_comments: Optional[:class:`bool`]
 Set this to `True` to also get all nested comments. Default to `False`. 
 
 
-<a href="./gatered/func.py#L34"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L36"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_posts`
 
@@ -103,7 +104,45 @@ req_delay: Optional[:class:`int`]
 Set delay between each page request. Set 0 to disable it. Default to 0.5. 
 
 
-<a href="./gatered/func.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="./gatered/func.py#L95"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+### <kbd>function</kbd> `get_comments`
+
+```python
+get_comments(
+    submission_id: str,
+    sort: Optional[str] = None,
+    all_comments: bool = False,
+    max_at_once: int = 8,
+    max_per_second: int = 4,
+    httpx_options: Dict[str, Any] = {},
+)
+```
+
+Async Generator to get comments batch by batch.
+
+eturns an async generator. Use async for loop to handle batch comments.
+
+#### Parameters
+
+submission_id: :class:`str`  
+The Submission id (starts with `t3_`).
+
+sort: Optional[:class:`str`]  
+Option to sort the comments of the submission, default to `None` (best)  
+Available options: `top`, `new`, `controversial`, `old`, `qa`.
+
+all_comments: Optional[:class:`bool`]  
+Set this to `True` to also get all nested comments. Default to `False`.
+
+max_at_once: Optional[:class:`int`]  
+Limits the maximum number of concurrently requests for all comments. Default to 8.
+
+max_per_second: Optional[:class:`int`]  
+Limits the number of requests spawned per second. Default to 4.
+
+
+<a href="./gatered/func.py#L153"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_pushshift_posts`
 

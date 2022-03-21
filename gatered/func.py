@@ -125,7 +125,7 @@ async def get_comments(
         raw_json = await client.raw_get_post_comments(submission_id, sort)
         yield list(raw_json["comments"].values())
 
-        more_comments = list(raw_json["moreComments"].values())
+        more_comments = raw_json["moreComments"].values()
 
         if all_comments and more_comments:
             while more_comments:

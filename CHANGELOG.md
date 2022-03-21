@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/countertek/gatered/v1.1.0) (2022-xx)
+
+### Features
+
+- Function: get_comments (async generator)
+
 ## [1.0.0](https://github.com/countertek/gatered/v1.0.0) (2022-03-15)
 
 ### Features

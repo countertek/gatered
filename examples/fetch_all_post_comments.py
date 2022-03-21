@@ -1,5 +1,3 @@
-# TODO: implement simple fetch example
-
 import asyncio
 from gatered import get_post_comments
 

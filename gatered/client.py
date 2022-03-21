@@ -1,7 +1,6 @@
 from typing import Any, Optional, TypeVar, Callable, Coroutine
 from typing_extensions import TypeAlias
 from functools import partial, partialmethod
-from itertools import chain
 
 from asyncio import sleep
 from aiometer import run_all
@@ -251,15 +250,18 @@ class Client:
         post = raw_json["posts"].get(submission_id)
         comments = list(raw_json["comments"].values())
 
-        more_comments = list(raw_json["moreComments"].values())
+        more_comments = raw_json["moreComments"].values()
 
         if all_comments and more_comments:
             while more_comments:
                 reqs = [
                     partial(
-                        self.raw_get_more_comments, submission_id, mc["token"], **kwargs
+                        self.raw_get_more_comments,
+                        submission_id,
+                        more_c["token"],
+                        **kwargs,
                     )
-                    for mc in more_comments
+                    for more_c in more_comments
                 ]
                 aggr_res = await run_all(
                     reqs,
@@ -268,17 +270,14 @@ class Client:
                 )
 
                 # Add comments to comments
-                comments += list(
-                    chain.from_iterable(
-                        [list(res["comments"].values()) for res in aggr_res]
-                    )
-                )
+                comments += [c for res in aggr_res for c in res["comments"].values()]
+
                 # Extract more comments
-                more_comments = list(
-                    chain.from_iterable(
-                        [list(res["moreComments"].values()) for res in aggr_res]
-                    )
-                )
+                more_comments = [
+                    more_c
+                    for res in aggr_res
+                    for more_c in res["moreComments"].values()
+                ]
 
         return {"post": post, "comments": comments}
 

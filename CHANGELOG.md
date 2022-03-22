@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/countertek/gatered/v1.2.0) (2022-03-23)
+
+### Features
+
+- Add examples playground on Replit
+- Function: get_posts_with_subreddit_info
+
+### Fixes
+
+- fix: get_posts will now yield list of posts
+- fix: make examples output using pprint
+
 ## [1.1.1](https://github.com/countertek/gatered/v1.1.1) (2022-03-23)
 
 ### Fixes

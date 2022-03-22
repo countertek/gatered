@@ -32,7 +32,7 @@ async def get_post_comments(
         return await client.get_post_comments(submission_id, all_comments=all_comments)
 
 
-async def get_posts(
+async def get_posts_with_subreddit_info(
     subreddit_name: str,
     sort: Optional[str] = "hot",
     t: Optional[str] = "day",
@@ -41,9 +41,10 @@ async def get_posts(
     httpx_options: Dict[str, Any] = {},
 ):
     """
-    Async Generator to get submissions batch by batch.
+    Async Generator to get submissions batch by batch, includes subreddit info on every yield.
 
-    Returns an async generator that yields a list of posts. Use `async for` loop to handle the results.
+    Returns an async generator that yields a dict with two fields, `posts` (list) and `subreddit` (dict).
+    Use `async for` loop to handle the results.
 
     - `subreddit_name` (str):
         The Subreddit name.
@@ -73,6 +74,64 @@ async def get_posts(
                 dist=dist,
             )
             yield data
+
+            # Check continue condition
+            token, dist = data.get("token"), data.get("dist")
+            if not token:
+                break
+
+            # Handle page limit
+            if isinstance(page_limit, (int, float)):
+                page_limit -= 1
+                if page_limit < 1:
+                    break
+
+            # Apply delay
+            await sleep(req_delay)
+
+
+async def get_posts(
+    subreddit_name: str,
+    sort: Optional[str] = "hot",
+    t: Optional[str] = "day",
+    page_limit: Optional[int] = 4,
+    req_delay: int = 0.5,
+    httpx_options: Dict[str, Any] = {},
+):
+    """
+    Async Generator to get submissions batch by batch.
+
+    Returns an async generator that yields a list of posts.
+    Use `async for` loop to handle the results.
+
+    - `subreddit_name` (str):
+        The Subreddit name.
+    - `sort` (str):
+        Option to sort the submissions, default to `hot`.
+        Available options: `hot`, `new`, `top`, `rising`
+    - `t` (str):
+        Type for sorting submissions by `top`, default to `day`.
+        Available options: `hour`, `day`, `week`, `month`, `year`, `all`
+    - `page_limit` (int):
+        Set a request limit for pages to fetch. Disable this limit by passing `None`.
+        Default to 4 (which will fetch 100 posts)
+    - `req_delay` (int):
+        Set delay between each page request. Set 0 to disable it. Default to 0.5.
+    """
+    log.debug(f"Fetching submissions and comments from subreddit *{subreddit_name}*")
+
+    async with Client(**httpx_options) as client:
+        token, dist = None, None
+
+        while True:
+            data = await client.get_posts(
+                subreddit_name,
+                sort=sort,
+                t=t,
+                after=token,
+                dist=dist,
+            )
+            yield data["posts"]
 
             # Check continue condition
             token, dist = data.get("token"), data.get("dist")

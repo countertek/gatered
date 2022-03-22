@@ -33,6 +33,7 @@ poetry add gatered
 
 The library provides easy functions to get start fast:
 - `gatered.func.get_post_comments`
+- `gatered.func.get_posts_with_subreddit_info`
 - `gatered.func.get_posts`
 - `gatered.func.get_comments`
 - `gatered.func.get_pushshift_posts`
@@ -51,4 +52,10 @@ from httpx import RequestError, HTTPStatusError
 
 from .client import Client
 from .pushshift import PushShiftAPI
-from .func import get_post_comments, get_posts, get_comments, get_pushshift_posts
+from .func import (
+    get_post_comments,
+    get_posts_with_subreddit_info,
+    get_posts,
+    get_comments,
+    get_pushshift_posts,
+)

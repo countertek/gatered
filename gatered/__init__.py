@@ -44,7 +44,7 @@ Errors can be handled by importing either `gatered.RequestError` or `gatered.HTT
 See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # Import error classes from httpx: https://www.python-httpx.org/exceptions/
 from httpx import RequestError, HTTPStatusError

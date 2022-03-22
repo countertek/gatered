@@ -1,3 +1,6 @@
+"""
+This module defines gatered client to fetch information through Reddit webAPI (gateway.reddit.com).
+"""
 from typing import Any, Optional, TypeVar, Callable, Coroutine
 from typing_extensions import TypeAlias
 from functools import partial, partialmethod
@@ -9,14 +12,13 @@ import logging
 
 T = TypeVar("T")
 log = logging.getLogger(__name__)
-RequestType: TypeAlias = "Coroutine[None, None, Optional[T]]"
+_RequestType: TypeAlias = "Coroutine[None, None, Optional[T]]"
 
 
 class Client:
     """
-    The Client that interacts with the Reddit gateway API and returns raw JSON.
-    Httpx options can be passed in when creating the client such as proxies:
-    https://www.python-httpx.org/api/#asyncclient
+    The Client that interacts with Reddit webAPI and returns raw JSON as `dict`.
+    [httpx options](https://www.python-httpx.org/api/#asyncclient) can be passed in when creating the client such as `proxies`.
     """
 
     _SUBREDDIT_SORT = "hot"
@@ -39,6 +41,10 @@ class Client:
     }
 
     def __init__(self, **options: Any):
+        """
+        Initialize a `Client` object, where `options` are
+        [httpx options](https://www.python-httpx.org/api/#asyncclient).
+        """
         self._client: Optional[AsyncClient] = None
         self._x_reddit_loid: str = "0"
         self._x_reddit_session: str = "0"
@@ -105,8 +111,8 @@ class Client:
         # we've run out of retries, raise
         r.raise_for_status()
 
-    _get: Callable[..., RequestType] = partialmethod(_request, "GET")
-    _post: Callable[..., RequestType] = partialmethod(_request, "POST")
+    _get: Callable[..., _RequestType] = partialmethod(_request, "GET")
+    _post: Callable[..., _RequestType] = partialmethod(_request, "POST")
 
     # -- Request endpoints impl. --
 
@@ -117,16 +123,13 @@ class Client:
         **kwargs: Any,
     ):
         """
-        Get More comments from a submission.
+        Get `comments` from a submission provided with a generated cache `moreComment` token.
+        Returns raw JSON.
 
-        Parameters
-        ----------
-        submission_id: :class:`str`
+        - `submission_id` (str):
             The Submission id (starts with `t3_`)
-        token: :class:`str`
+        - `token` (str):
             Token for more comments content.
-
-        Returns raw comments list.
         """
         payload = {"token": token}
         params = {"emotes_as_images": "true"}
@@ -144,17 +147,14 @@ class Client:
         **kwargs: Any,
     ):
         """
-        Get post and its comments (comments and its related info).
+        Get `post` and its `comments` + `moreComments` (including its related info).
+        Return raw JSON.
 
-        Parameters
-        ----------
-        submission_id: :class:`str`
+        - `submission_id` (str):
             The Submission id (starts with `t3_`)
-        sort: Optional[:class:`str`]
-            Option to sort the comments of the submission, default to None (best)
-            Available options: `top`, `new`, `controversial`, `old`, `qa`
-
-        Returns raw submission and its comments, moreComments etc.
+        - `sort` (str):
+            Option to sort the comments of the submission, default to `None` (best).
+            Available options: `top`, `new`, `controversial`, `old`, `qa`, `None`
         """
         params = {
             "emotes_as_images": "true",
@@ -182,24 +182,19 @@ class Client:
         **kwargs: Any,
     ):
         """
-        Get submissions list from a subreddit.
-        Note: This also includes ads posts.
+        Get submissions list from a subreddit. This also includes advertisement submissions.
+        Returns raw JSON.
 
-        Parameters
-        ----------
-        subreddit_name: :class:`str`
+        - `subreddit_name` (str):
             The Subreddit name.
-        sort: Optional[:class:`str`]
-            Option to sort the submissions, default to `hot`
+        - `sort` (str):
+            Option to sort the submissions, default to `hot`.
             Available options: `hot`, `new`, `top`, `rising`
-        t: Optional[:class:`str`]
-            Type for sorting submissions by `top`, default to `day`
+        - `t` (str):
+            Type for sorting submissions by `top`, default to `day`.
             Available options: `hour`, `day`, `week`, `month`, `year`, `all`
-        after: Optional[:class:`str`]
-        dist: Optional[:class:`str`]
-            Needed for pagnitions.
-
-        Returns raw submissions list.
+        - `after` (str) and `dist` (str):
+            Included in the returned raw JSON. Used for pagination.
         """
         params = {"layout": "classic"}
         # Check for sort
@@ -229,21 +224,19 @@ class Client:
         Get submission and its comments.
         If `all_comments` is `True`, it will fetch all the comments that are nested by reddit.
 
-        Parameters
-        ----------
-        submission_id: :class:`str`
-            The Submission id (starts with `t3_`).
-        sort: Optional[:class:`str`]
-            Option to sort the comments of the submission, default to `None` (best)
-            Available options: `top`, `new`, `controversial`, `old`, `qa`.
-        all_comments: Optional[:class:`bool`]
-            Set this to `True` to also get all nested comments. Default to `False`.
-        max_at_once: Optional[:class:`int`]
-            Limits the maximum number of concurrently requests for all comments. Default to 8.
-        max_per_second: Optional[:class:`int`]
-            Limits the number of requests spawned per second. Default to 4.
+        Returns a dict with `post` as dict and its `comments` as list
 
-        Returns `post` (submission) and its `comments` as list
+        - `submission_id` (str):
+            The Submission id (starts with `t3_`).
+        - `sort` (str):
+            Option to sort the comments of the submission, default to `None` (best).
+            Available options: `top`, `new`, `controversial`, `old`, `qa`.
+        - `all_comments` (bool):
+            Set this to `True` to also get all nested comments. Default to `False`.
+        - `max_at_once` (int):
+            Limits the maximum number of concurrently requests for fetching all comments. Default to 8.
+        - `max_per_second` (int):
+            Limits the number of requests spawned per second. Default to 4.
         """
         raw_json = await self.raw_get_post_comments(submission_id, sort, **kwargs)
 
@@ -294,21 +287,18 @@ class Client:
         Get submissions list from a subreddit, with ads filtered.
         This provides flexibility for you to handle pagninations by yourself.
 
-        Parameters
-        ----------
-        subreddit_name: :class:`str`
+        Returns a dict with `subreddit` and its `posts` as list, as well as `token` and `dist` for paginations.
+
+        - `subreddit_name` (str):
             The Subreddit name.
-        sort: Optional[:class:`str`]
+        - `sort` (str):
             Option to sort the submissions, default to `hot`
             Available options: `hot`, `new`, `top`, `rising`
-        t: Optional[:class:`str`]
+        - `t` (str):
             Type for sorting submissions by `top`, default to `day`
             Available options: `hour`, `day`, `week`, `month`, `year`, `all`
-        after: Optional[:class:`str`]
-        dist: Optional[:class:`str`]
-            Needed for pagnitions.
-
-        Returns `subreddit` and its `posts` (submissions) as list, as well as `token` and `dist` for paginations.
+        - `after` (str) and `dist` (str):
+            Used for pagination.
         """
         raw_json = await self.raw_get_posts(
             subreddit_name, sort, t, after, dist, **kwargs

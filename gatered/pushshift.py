@@ -1,5 +1,7 @@
-from typing import Any, Optional, TypeVar, Coroutine
-from typing_extensions import TypeAlias
+"""
+This module defines PushShiftAPi client to fetch information from PushShift Reddit Archive.
+"""
+from typing import Any, Optional, TypeVar
 
 from asyncio import sleep
 from httpx import AsyncClient, Timeout
@@ -7,16 +9,15 @@ import logging
 
 T = TypeVar("T")
 log = logging.getLogger(__name__)
-RequestType: TypeAlias = "Coroutine[None, None, Optional[T]]"
 
 
 class PushShiftAPI:
     """
-    The Client that interacts with the PushShift API and returns raw JSON.
-    Httpx options can be passed in when creating the client.
+    The Client that interacts with the PushShift API and returns raw JSON as `dict`.
+    [httpx options](https://www.python-httpx.org/api/#asyncclient) can be passed in when creating the client such as `proxies`.
 
-    This acts as a helper to fetch past submissions based on time range (which is not provided by reddit).
-    To get the comments, it's recommended to use offical Gateway API as source.
+    This acts as a helper to fetch past submissions based on time range (which is not supported by reddit).
+    To get the comments, it would be better to get a list of `submission_id` from PushShift and use `gatered.func.get_comments` instead.
     """
 
     _BASE_URL = "https://api.pushshift.io"
@@ -35,6 +36,10 @@ class PushShiftAPI:
     _DEFAULT_SIZE = 100
 
     def __init__(self, **options: Any):
+        """
+        Initialize a `PushShiftAPI` object, where `options` are
+        [httpx options](https://www.python-httpx.org/api/#asyncclient).
+        """
         self._client: Optional[AsyncClient] = None
         self._x_reddit_loid: str = "0"
         self._x_reddit_session: str = "0"
@@ -90,23 +95,18 @@ class PushShiftAPI:
         **kwargs: Any,
     ):
         """
-        Get submissions list from a subreddit.
+        Get a list of submissions from PushShift. Returns a list of PushShift archived submissions.
 
-        Parameters
-        ----------
-        subreddit_name: :class:`str`
+        - `subreddit_name` (str):
             The Subreddit name.
-        before: Optional[:class:`int`]
-        after: Optional[:class:`int`]
+        - `before` (`Optional[int]`) and `after` (`Optional[int]`):
             Provide epoch time (without ms) to get posts from a time range.
             Default to `None` to get latest posts.
-        sort: Optional[:class:`str`]
+        - `sort` (str):
             Option to sort the submissions, default to `desc`
             Available options: `asc`, `desc`
-        size: Optional[:class:`int`]
+        - `size` (int):
             Size of list to fetch. Default to maximum of 100.
-
-        Returns submissions list.
         """
         res = await self._get(
             "/reddit/search/submission",

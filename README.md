@@ -1,6 +1,6 @@
 # GateRed
 
-A library for interacting with Reddit Gateway API (Web API), w/ pushshift historical posts support.
+A library to fetch Reddit data using Reddit WebAPI (gateway), w/ pushshift historical submissions support.
 
 [![Latest Version](https://img.shields.io/pypi/v/gatered.svg)](https://pypi.python.org/pypi/gatered)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/gatered)](https://pypi.python.org/pypi/gatered)
@@ -8,7 +8,7 @@ A library for interacting with Reddit Gateway API (Web API), w/ pushshift histor
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![GitHub license](https://img.shields.io/github/license/countertek/gatered)](https://github.com/countertek/gatered/blob/main/LICENSE)
 
-**[Documentation](https://countertek.github.io/gatered)**
+**[Documentation](https://countertek.github.io/gatered)** · **[Replit Playground](https://replit.com/@darekaze/gatered-examples#main.py)**
 
 ## Why this library?
 
@@ -44,11 +44,11 @@ Alternatively you can directly use `gatered.client.Client` and `gatered.pushshif
 
 Errors can be handled by importing either `gatered.RequestError` or `gatered.HTTPStatusError`, see [httpx exceptions](https://www.python-httpx.org/exceptions/) to learn more.
 
-See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples.
+See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples. Alternately, you can [fork the example repo on Replit](https://replit.com/@darekaze/gatered-examples#main.py) and play around online.
 
 ## License
 
-Copyright 2022 countertek
+Copyright 2022 CounterTek
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -1,6 +1,8 @@
 import asyncio
 from gatered import get_pushshift_posts
 from datetime import datetime
+from pprint import pprint
+
 
 start_desc = datetime(2022, 3, 1)
 end_till = datetime(2022, 2, 26)
@@ -12,8 +14,8 @@ async def fetch_posts(subreddit_name: str):
         start_desc=start_desc,
         end_till=end_till,
     ):
-        print(len(data))
-        print(data[0])
+        pprint(data[0])
+        pprint(len(data))
 
 
 async def fetch_posts_aggregate(subreddit_name: str):
@@ -26,7 +28,7 @@ async def fetch_posts_aggregate(subreddit_name: str):
         )
         for post in data
     ]
-    print(len(res))
+    pprint(len(res))
 
 
 if __name__ == "__main__":

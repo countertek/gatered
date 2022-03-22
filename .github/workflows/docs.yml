@@ -11,14 +11,21 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Cache pip
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.2.0
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.cache/pip
-          key: pdoc-1
-      - name: Install pdoc
-        run: python -m pip install --upgrade pip pdoc
+          path: .venv
+          key: docs-poetry-${{ hashFiles('pyproject.toml') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
       - name: Run pdoc
-        run: pdoc -o docs gatered
+        run: poetry run pdoc -o docs gatered
       - name: push
         uses: actions-x/commit@v2

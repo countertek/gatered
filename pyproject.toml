@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "gatered"
-version = "1.1.0"
+version = "1.1.1"
 description = "Reddit Gateway API Library"
-authors = ["Darwin <darekaze@gmail.com>"]
+authors = ["DaRekaze <darekaze@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/CounterTek/gatered"
+documentation = "https://countertek.github.io/gatered"
 keywords = ["reddit", "reddit api"]
 classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
@@ -18,6 +19,9 @@ classifiers = [
 packages = [
     { include = "gatered"},
 ]
+
+[tool.poetry.urls]
+"Change Log" = "https://github.com/countertek/gatered/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"

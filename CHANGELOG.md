@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1](https://github.com/countertek/gatered/v1.1.1) (2022-03-23)
+
+### Fixes
+
+- fix: update project metadata
+
 ## [1.1.0](https://github.com/countertek/gatered/v1.1.0) (2022-03-22)
 
 ### Features

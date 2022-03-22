@@ -45,3 +45,19 @@ Alternatively you can directly use `gatered.client.Client` and `gatered.pushshif
 Errors can be handled by importing either `gatered.RequestError` or `gatered.HTTPStatusError`, see [httpx exceptions](https://www.python-httpx.org/exceptions/) to learn more.
 
 See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples.
+
+## License
+
+Copyright 2022 countertek
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

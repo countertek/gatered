@@ -1,3 +1,7 @@
+"""
+This module contains easy functions to acquire information from Reddit. 
+All functions are async and can be called directly without context manager.
+"""
 from typing import Any, Dict, Optional
 from functools import partial
 from asyncio import sleep
@@ -18,16 +22,11 @@ async def get_post_comments(
 ):
     """
     Helper function to get submission and its comments.
-    If `all_comments` is `True`, it will fetch all the comments that are nested by reddit.
 
-    Parameters
-    ----------
-    submission_id: :class:`str`
-        The Submission id (starts with `t3_`).
-    all_comments: Optional[:class:`bool`]
-        Set this to `True` to also get all nested comments. Default to `False`.
+    Provide `submission_id` (starts with `t3_`) and
+    if `all_comments` is `True`, it will fetch all the comments that are nested by reddit.
 
-    Returns `post` (submission) and its `comments` as list
+    Returns a dict with `post` as dict and its `comments` as list.
     """
     async with Client(**httpx_options) as client:
         return await client.get_post_comments(submission_id, all_comments=all_comments)
@@ -42,25 +41,23 @@ async def get_posts(
     httpx_options: Dict[str, Any] = {},
 ):
     """
-    Async Generator to get submissions page by page.
+    Async Generator to get submissions batch by batch.
 
-    Parameters
-    ----------
-    subreddit_name: :class:`str`
-        Name of the subreddit.
-    sort: Optional[:class:`str`]
-        Option to sort the submissions, default to `hot`
+    Returns an async generator that yields a list of posts. Use `async for` loop to handle the results.
+
+    - `subreddit_name` (str):
+        The Subreddit name.
+    - `sort` (str):
+        Option to sort the submissions, default to `hot`.
         Available options: `hot`, `new`, `top`, `rising`
-    t: Optional[:class:`str`]
-        Type for sorting submissions by `top`, default to `day`
+    - `t` (str):
+        Type for sorting submissions by `top`, default to `day`.
         Available options: `hour`, `day`, `week`, `month`, `year`, `all`
-    page_limit: Optional[:class:`int`]
+    - `page_limit` (int):
         Set a request limit for pages to fetch. Disable this limit by passing `None`.
         Default to 4 (which will fetch 100 posts)
-    req_delay: Optional[:class:`int`]
+    - `req_delay` (int):
         Set delay between each page request. Set 0 to disable it. Default to 0.5.
-
-    Returns an async generator. Use async for loop to handle page results.
     """
     log.debug(f"Fetching submissions and comments from subreddit *{subreddit_name}*")
 
@@ -103,21 +100,19 @@ async def get_comments(
     """
     Async Generator to get comments batch by batch.
 
-    Parameters
-    ----------
-    submission_id: :class:`str`
-        The Submission id (starts with `t3_`).
-    sort: Optional[:class:`str`]
-        Option to sort the comments of the submission, default to `None` (best)
-        Available options: `top`, `new`, `controversial`, `old`, `qa`.
-    all_comments: Optional[:class:`bool`]
-        Set this to `True` to also get all nested comments. Default to `False`.
-    max_at_once: Optional[:class:`int`]
-        Limits the maximum number of concurrently requests for all comments. Default to 8.
-    max_per_second: Optional[:class:`int`]
-        Limits the number of requests spawned per second. Default to 4.
+    Returns an async generator that yields a list of comments. Use `async for` loop to handle the results.
 
-    Returns an async generator. Use async for loop to handle batch comments.
+    - `submission_id` (str):
+        The Submission id (starts with `t3_`).
+    - `sort` (str):
+        Option to sort the comments of the submission, default to `None` (best).
+        Available options: `top`, `new`, `controversial`, `old`, `qa`.
+    - `all_comments` (bool):
+        Set this to `True` to also get all nested comments. Default to `False`.
+    - `max_at_once` (int):
+        Limits the maximum number of concurrently requests for fetching all comments. Default to 8.
+    - `max_per_second` (int):
+        Limits the number of requests spawned per second. Default to 4.
     """
     log.debug(f"Fetching comments from submission *{submission_id}*")
 
@@ -158,22 +153,20 @@ async def get_pushshift_posts(
     httpx_options: Dict[str, Any] = {},
 ):
     """
-    Async Generator to get submissions by time range.
+    Async Generator to get archived submissions by time range from pushshift.
 
-    Parameters
-    ----------
-    subreddit_name: :class:`str`
+    Returns an async generator that yields a list of posts. Use `async for` loop to handle the results.
+
+    - `subreddit_name` (str):
         Name of the subreddit.
-    start_desc: Optional[:class:`datetime`]
+    - `start_desc` (`Optional[datetime]`):
         Provide `datetime` to get posts of a time range.
         Default to `None` to get from latest posts.
-    end_till: Optional[:class:`datetime`]
+    - `end_till` (`Optional[datetime]`):
         Provide `datetime` to get posts of a time range.
         Default to `None` to get all existing posts.
-    req_delay: Optional[:class:`int`]
+    - `req_delay` (int):
         Set delay between each page request. Set 0 to disable it. Default to 0.5.
-
-    Returns an async generator. Use async for loop to handle page results.
     """
     log.debug(f"Fetching pushshift submissions from subreddit *{subreddit_name}*")
 

@@ -5,12 +5,12 @@ from pprint import pprint
 
 async def fetch_posts(subreddit_name: str):
     async for data in get_posts(subreddit_name):
-        pprint(data["posts"][0])
-        pprint(len(data["posts"]))
+        pprint(data[0])
+        pprint(len(data))
 
 
 async def fetch_posts_aggregate(subreddit_name: str):
-    res = [post async for data in get_posts(subreddit_name) for post in data["posts"]]
+    res = [post async for data in get_posts(subreddit_name) for post in data]
     pprint(len(res))
 
 

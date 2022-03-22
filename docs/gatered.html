@@ -88,6 +88,7 @@ poetry add gatered
 
 <ul>
 <li><code><a href="gatered/func.html#get_post_comments">gatered.func.get_post_comments</a></code></li>
+<li><code><a href="gatered/func.html#get_posts_with_subreddit_info">gatered.func.get_posts_with_subreddit_info</a></code></li>
 <li><code><a href="gatered/func.html#get_posts">gatered.func.get_posts</a></code></li>
 <li><code><a href="gatered/func.html#get_comments">gatered.func.get_comments</a></code></li>
 <li><code><a href="gatered/func.html#get_pushshift_posts">gatered.func.get_pushshift_posts</a></code></li>
@@ -137,6 +138,7 @@ poetry add gatered
 
 <span class="sd">The library provides easy functions to get start fast:</span>
 <span class="sd">- `gatered.func.get_post_comments`</span>
+<span class="sd">- `gatered.func.get_posts_with_subreddit_info`</span>
 <span class="sd">- `gatered.func.get_posts`</span>
 <span class="sd">- `gatered.func.get_comments`</span>
 <span class="sd">- `gatered.func.get_pushshift_posts`</span>
@@ -148,14 +150,20 @@ poetry add gatered
 <span class="sd">See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.1.1&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.2.0&quot;</span>
 
 <span class="c1"># Import error classes from httpx: https://www.python-httpx.org/exceptions/</span>
 <span class="kn">from</span> <span class="nn">httpx</span> <span class="kn">import</span> <span class="n">RequestError</span><span class="p">,</span> <span class="n">HTTPStatusError</span>
 
 <span class="kn">from</span> <span class="nn">.client</span> <span class="kn">import</span> <span class="n">Client</span>
 <span class="kn">from</span> <span class="nn">.pushshift</span> <span class="kn">import</span> <span class="n">PushShiftAPI</span>
-<span class="kn">from</span> <span class="nn">.func</span> <span class="kn">import</span> <span class="n">get_post_comments</span><span class="p">,</span> <span class="n">get_posts</span><span class="p">,</span> <span class="n">get_comments</span><span class="p">,</span> <span class="n">get_pushshift_posts</span>
+<span class="kn">from</span> <span class="nn">.func</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_post_comments</span><span class="p">,</span>
+    <span class="n">get_posts_with_subreddit_info</span><span class="p">,</span>
+    <span class="n">get_posts</span><span class="p">,</span>
+    <span class="n">get_comments</span><span class="p">,</span>
+    <span class="n">get_pushshift_posts</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 
         </details>

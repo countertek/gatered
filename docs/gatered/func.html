@@ -34,6 +34,9 @@
                     <a class="function" href="#get_post_comments">get_post_comments</a>
             </li>
             <li>
+                    <a class="function" href="#get_posts_with_subreddit_info">get_posts_with_subreddit_info</a>
+            </li>
+            <li>
                     <a class="function" href="#get_posts">get_posts</a>
             </li>
             <li>
@@ -98,7 +101,7 @@ All functions are async and can be called directly without context manager.</p>
         <span class="k">return</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_post_comments</span><span class="p">(</span><span class="n">submission_id</span><span class="p">,</span> <span class="n">all_comments</span><span class="o">=</span><span class="n">all_comments</span><span class="p">)</span>
 
 
-<span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts</span><span class="p">(</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts_with_subreddit_info</span><span class="p">(</span>
     <span class="n">subreddit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;hot&quot;</span><span class="p">,</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span>
@@ -107,9 +110,10 @@ All functions are async and can be called directly without context manager.</p>
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Async Generator to get submissions batch by batch.</span>
+<span class="sd">    Async Generator to get submissions batch by batch, includes subreddit info on every yield.</span>
 
-<span class="sd">    Returns an async generator that yields a list of posts. Use `async for` loop to handle the results.</span>
+<span class="sd">    Returns an async generator that yields a dict with two fields, `posts` (list) and `subreddit` (dict).</span>
+<span class="sd">    Use `async for` loop to handle the results.</span>
 
 <span class="sd">    - `subreddit_name` (str):</span>
 <span class="sd">        The Subreddit name.</span>
@@ -139,6 +143,64 @@ All functions are async and can be called directly without context manager.</p>
                 <span class="n">dist</span><span class="o">=</span><span class="n">dist</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">yield</span> <span class="n">data</span>
+
+            <span class="c1"># Check continue condition</span>
+            <span class="n">token</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Handle page limit</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">page_limit</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">page_limit</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">page_limit</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Apply delay</span>
+            <span class="k">await</span> <span class="n">sleep</span><span class="p">(</span><span class="n">req_delay</span><span class="p">)</span>
+
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts</span><span class="p">(</span>
+    <span class="n">subreddit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;hot&quot;</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span>
+    <span class="n">page_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">req_delay</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Async Generator to get submissions batch by batch.</span>
+
+<span class="sd">    Returns an async generator that yields a list of posts.</span>
+<span class="sd">    Use `async for` loop to handle the results.</span>
+
+<span class="sd">    - `subreddit_name` (str):</span>
+<span class="sd">        The Subreddit name.</span>
+<span class="sd">    - `sort` (str):</span>
+<span class="sd">        Option to sort the submissions, default to `hot`.</span>
+<span class="sd">        Available options: `hot`, `new`, `top`, `rising`</span>
+<span class="sd">    - `t` (str):</span>
+<span class="sd">        Type for sorting submissions by `top`, default to `day`.</span>
+<span class="sd">        Available options: `hour`, `day`, `week`, `month`, `year`, `all`</span>
+<span class="sd">    - `page_limit` (int):</span>
+<span class="sd">        Set a request limit for pages to fetch. Disable this limit by passing `None`.</span>
+<span class="sd">        Default to 4 (which will fetch 100 posts)</span>
+<span class="sd">    - `req_delay` (int):</span>
+<span class="sd">        Set delay between each page request. Set 0 to disable it. Default to 0.5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching submissions and comments from subreddit *</span><span class="si">{</span><span class="n">subreddit_name</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">Client</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">token</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_posts</span><span class="p">(</span>
+                <span class="n">subreddit_name</span><span class="p">,</span>
+                <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+                <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">after</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+                <span class="n">dist</span><span class="o">=</span><span class="n">dist</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;posts&quot;</span><span class="p">]</span>
 
             <span class="c1"># Check continue condition</span>
             <span class="n">token</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
@@ -299,12 +361,12 @@ if <code>all_comments</code> is <code>True</code>, it will fetch all the comment
 
 
                 </section>
-                <section id="get_posts">
-                            <div class="attr function"><a class="headerlink" href="#get_posts">#&nbsp;&nbsp</a>
+                <section id="get_posts_with_subreddit_info">
+                            <div class="attr function"><a class="headerlink" href="#get_posts_with_subreddit_info">#&nbsp;&nbsp</a>
 
         
             <span class="def">async def</span>
-            <span class="name">get_posts</span><span class="signature">(
+            <span class="name">get_posts_with_subreddit_info</span><span class="signature">(
     subreddit_name: str,
     sort: Union[str, NoneType] = &#39;hot&#39;,
     t: Union[str, NoneType] = &#39;day&#39;,
@@ -316,7 +378,7 @@ if <code>all_comments</code> is <code>True</code>, it will fetch all the comment
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts</span><span class="p">(</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts_with_subreddit_info</span><span class="p">(</span>
     <span class="n">subreddit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;hot&quot;</span><span class="p">,</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span>
@@ -325,9 +387,10 @@ if <code>all_comments</code> is <code>True</code>, it will fetch all the comment
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Async Generator to get submissions batch by batch.</span>
+<span class="sd">    Async Generator to get submissions batch by batch, includes subreddit info on every yield.</span>
 
-<span class="sd">    Returns an async generator that yields a list of posts. Use `async for` loop to handle the results.</span>
+<span class="sd">    Returns an async generator that yields a dict with two fields, `posts` (list) and `subreddit` (dict).</span>
+<span class="sd">    Use `async for` loop to handle the results.</span>
 
 <span class="sd">    - `subreddit_name` (str):</span>
 <span class="sd">        The Subreddit name.</span>
@@ -375,9 +438,111 @@ if <code>all_comments</code> is <code>True</code>, it will fetch all the comment
 
         </details>
 
+            <div class="docstring"><p>Async Generator to get submissions batch by batch, includes subreddit info on every yield.</p>
+
+<p>Returns an async generator that yields a dict with two fields, <code>posts</code> (list) and <code>subreddit</code> (dict).
+Use <code>async for</code> loop to handle the results.</p>
+
+<ul>
+<li><code>subreddit_name</code> (str):
+The Subreddit name.</li>
+<li><code>sort</code> (str):
+Option to sort the submissions, default to <code>hot</code>.
+Available options: <code>hot</code>, <code>new</code>, <code>top</code>, <code>rising</code></li>
+<li><code>t</code> (str):
+Type for sorting submissions by <code>top</code>, default to <code>day</code>.
+Available options: <code>hour</code>, <code>day</code>, <code>week</code>, <code>month</code>, <code>year</code>, <code>all</code></li>
+<li><code>page_limit</code> (int):
+Set a request limit for pages to fetch. Disable this limit by passing <code>None</code>.
+Default to 4 (which will fetch 100 posts)</li>
+<li><code>req_delay</code> (int):
+Set delay between each page request. Set 0 to disable it. Default to 0.5.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="get_posts">
+                            <div class="attr function"><a class="headerlink" href="#get_posts">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">async def</span>
+            <span class="name">get_posts</span><span class="signature">(
+    subreddit_name: str,
+    sort: Union[str, NoneType] = &#39;hot&#39;,
+    t: Union[str, NoneType] = &#39;day&#39;,
+    page_limit: Union[int, NoneType] = 4,
+    req_delay: int = 0.5,
+    httpx_options: Dict[str, Any] = {}
+)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts</span><span class="p">(</span>
+    <span class="n">subreddit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;hot&quot;</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span>
+    <span class="n">page_limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">req_delay</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Async Generator to get submissions batch by batch.</span>
+
+<span class="sd">    Returns an async generator that yields a list of posts.</span>
+<span class="sd">    Use `async for` loop to handle the results.</span>
+
+<span class="sd">    - `subreddit_name` (str):</span>
+<span class="sd">        The Subreddit name.</span>
+<span class="sd">    - `sort` (str):</span>
+<span class="sd">        Option to sort the submissions, default to `hot`.</span>
+<span class="sd">        Available options: `hot`, `new`, `top`, `rising`</span>
+<span class="sd">    - `t` (str):</span>
+<span class="sd">        Type for sorting submissions by `top`, default to `day`.</span>
+<span class="sd">        Available options: `hour`, `day`, `week`, `month`, `year`, `all`</span>
+<span class="sd">    - `page_limit` (int):</span>
+<span class="sd">        Set a request limit for pages to fetch. Disable this limit by passing `None`.</span>
+<span class="sd">        Default to 4 (which will fetch 100 posts)</span>
+<span class="sd">    - `req_delay` (int):</span>
+<span class="sd">        Set delay between each page request. Set 0 to disable it. Default to 0.5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching submissions and comments from subreddit *</span><span class="si">{</span><span class="n">subreddit_name</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">Client</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">token</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_posts</span><span class="p">(</span>
+                <span class="n">subreddit_name</span><span class="p">,</span>
+                <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+                <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">after</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+                <span class="n">dist</span><span class="o">=</span><span class="n">dist</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;posts&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Check continue condition</span>
+            <span class="n">token</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Handle page limit</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">page_limit</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">page_limit</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">page_limit</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Apply delay</span>
+            <span class="k">await</span> <span class="n">sleep</span><span class="p">(</span><span class="n">req_delay</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
             <div class="docstring"><p>Async Generator to get submissions batch by batch.</p>
 
-<p>Returns an async generator that yields a list of posts. Use <code>async for</code> loop to handle the results.</p>
+<p>Returns an async generator that yields a list of posts.
+Use <code>async for</code> loop to handle the results.</p>
 
 <ul>
 <li><code>subreddit_name</code> (str):

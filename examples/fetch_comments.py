@@ -1,11 +1,12 @@
 import asyncio
 from gatered import get_comments
+from pprint import pprint
 
 
 async def fetch_comments(submission_id: str):
-    async for comments in get_comments(submission_id, all_comments=True):
-        print(len(comments))
-        print(comments[0])
+    async for comments in get_comments(submission_id, all_comments=False):
+        pprint(comments[0])
+        pprint(len(comments))
 
 
 async def fetch_comments_aggregate(submission_id: str):
@@ -14,7 +15,7 @@ async def fetch_comments_aggregate(submission_id: str):
         async for comments in get_comments(submission_id, all_comments=True)
         for comment in comments
     ]
-    print(len(res))
+    pprint(len(res))
 
 
 if __name__ == "__main__":

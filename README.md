@@ -36,6 +36,7 @@ poetry add gatered
 
 The library provides easy functions to get start fast:
 - `gatered.func.get_post_comments`
+- `gatered.func.get_posts_with_subreddit_info`
 - `gatered.func.get_posts`
 - `gatered.func.get_comments`
 - `gatered.func.get_pushshift_posts`

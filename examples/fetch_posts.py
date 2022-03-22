@@ -1,6 +1,13 @@
 import asyncio
-from gatered import get_posts
+from gatered import get_posts, get_posts_with_subreddit_info
 from pprint import pprint
+
+
+async def fetch_posts_with_subreddit_info(subreddit_name: str):
+    async for data in get_posts_with_subreddit_info(subreddit_name):
+        pprint(data["subreddit"])
+        pprint(data["posts"][0])
+        pprint(len(data["posts"]))
 
 
 async def fetch_posts(subreddit_name: str):

@@ -1,0 +1,24 @@
+name: Publish docs via GitHub Pages
+on:
+  push:
+    branches:
+      - main
+jobs:
+  generate_pdoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pdoc-1
+      - name: Install pdoc
+        run: python -m pip install --upgrade pip pdoc
+      - name: Run pdoc
+        run: pdoc -o docs gatered
+      - name: push
+        uses: actions-x/commit@v2

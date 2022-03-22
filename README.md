@@ -1,6 +1,6 @@
 # GateRed
 
-A utils for interacting with Reddit Gateway API (Web API), w/ pushshift historical posts support.
+A library for interacting with Reddit Gateway API (Web API), w/ pushshift historical posts support.
 
 [![Latest Version](https://img.shields.io/pypi/v/gatered.svg)](https://pypi.python.org/pypi/gatered)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/gatered)](https://pypi.python.org/pypi/gatered)

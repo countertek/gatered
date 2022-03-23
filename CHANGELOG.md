@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/countertek/gatered/v1.3.0) (2022-03-23)
+
+### Features
+
+- Minor adjustment to functions `get_comments` and `get_post_comments`
+
+### Fixes
+
+- documentations: clarify usages
+
 ## [1.2.0](https://github.com/countertek/gatered/v1.2.0) (2022-03-23)
 
 ### Features

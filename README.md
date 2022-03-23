@@ -8,17 +8,20 @@ A library to fetch Reddit data using Reddit WebAPI (gateway), w/ pushshift histo
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![GitHub license](https://img.shields.io/github/license/countertek/gatered)](https://github.com/countertek/gatered/blob/main/LICENSE)
 
-**[Documentation](https://countertek.github.io/gatered)** · **[Replit Playground](https://replit.com/@darekaze/gatered-examples#main.py)**
+**[Documentation](https://countertek.github.io/gatered)**
+**·**
+**[Replit Playground](https://replit.com/@darekaze/gatered-examples#main.py)**
 
 ## Why this library?
 
-Although Reddit has developer APIs and there are existing libraries (e.g. praw) to interact with reddit, there are still several drawbacks in terms of collecting data:
+Although there are existing libraries (e.g. praw) to interact with Reddit developer's API,
+there are still several drawbacks when we trying to collect vast amount of data.
+**gatered** tries to counter these problems to provide these features:
 
-- An API key is needed to collect data.
-- Rate limit is based on API keys.
-- Some fields are missing using developer APIs.
-
-Therefore, **gatered** exists just to counter this problem. It directly access Reddit's web API to get the whole information. No authentication is needed, and it supports proxy provided by [httpx](https://www.python-httpx.org/advanced/#http-proxying).
+- No authentication (API key) is needed to access the data.
+- Extra attributes is presented using the Reddit webAPI compared to the public devAPI.
+- Fully Async based.
+- Proxy support via [httpx](https://www.python-httpx.org/advanced/#http-proxying).
 
 ## Install
 
@@ -43,9 +46,11 @@ The library provides easy functions to get start fast:
 
 Alternatively you can directly use `gatered.client.Client` and `gatered.pushshift.PushShiftAPI` classes as your base to implement your own logics.
 
-Errors can be handled by importing either `gatered.RequestError` or `gatered.HTTPStatusError`, see [httpx exceptions](https://www.python-httpx.org/exceptions/) to learn more.
+Errors can be handled by importing either `gatered.RequestError` or `gatered.HTTPStatusError`,
+see [httpx exceptions](https://www.python-httpx.org/exceptions/) to learn more.
 
-See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples. Alternately, you can [fork the example repo on Replit](https://replit.com/@darekaze/gatered-examples#main.py) and play around online.
+See [`examples/`](https://github.com/countertek/gatered/tree/main/examples/) for more examples.
+Alternately, you can [fork the example repo on Replit](https://replit.com/@darekaze/gatered-examples#main.py) and play around online.
 
 ## License
 

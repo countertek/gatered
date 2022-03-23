@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 async def get_post_comments(
     submission_id: str,
     all_comments: bool = False,
+    sort: Optional[str] = None,
     httpx_options: Dict[str, Any] = {},
 ):
     """
@@ -26,10 +27,17 @@ async def get_post_comments(
     Provide `submission_id` (starts with `t3_`) and
     if `all_comments` is `True`, it will fetch all the comments that are nested by reddit.
 
+    Provide `sort` as an option to sort the comments of the submission, default to `None` (best).
+    Available `sort` options: `top`, `new`, `controversial`, `old`, `qa`.
+
     Returns a dict with `post` as dict and its `comments` as list.
     """
     async with Client(**httpx_options) as client:
-        return await client.get_post_comments(submission_id, all_comments=all_comments)
+        return await client.get_post_comments(
+            submission_id,
+            sort=sort,
+            all_comments=all_comments,
+        )
 
 
 async def get_posts_with_subreddit_info(
@@ -151,13 +159,12 @@ async def get_posts(
 async def get_comments(
     submission_id: str,
     sort: Optional[str] = None,
-    all_comments: bool = False,
     max_at_once: int = 8,
     max_per_second: int = 4,
     httpx_options: Dict[str, Any] = {},
 ):
     """
-    Async Generator to get comments batch by batch.
+    Async Generator to get all comments batch by batch.
 
     Returns an async generator that yields a list of comments. Use `async for` loop to handle the results.
 
@@ -166,12 +173,10 @@ async def get_comments(
     - `sort` (str):
         Option to sort the comments of the submission, default to `None` (best).
         Available options: `top`, `new`, `controversial`, `old`, `qa`.
-    - `all_comments` (bool):
-        Set this to `True` to also get all nested comments. Default to `False`.
     - `max_at_once` (int):
-        Limits the maximum number of concurrently requests for fetching all comments. Default to 8.
+        Limits the maximum number of concurrently requests when fetching nested comments. Default to 8.
     - `max_per_second` (int):
-        Limits the number of requests spawned per second. Default to 4.
+        Limits the number of requests spawned per second when fetching nested comments. Default to 4.
     """
     log.debug(f"Fetching comments from submission *{submission_id}*")
 
@@ -180,28 +185,24 @@ async def get_comments(
         yield list(raw_json["comments"].values())
 
         more_comments = raw_json["moreComments"].values()
+        while more_comments:
+            reqs = [
+                partial(client.raw_get_more_comments, submission_id, mc["token"])
+                for mc in more_comments
+            ]
+            aggr_res = await run_all(
+                reqs,
+                max_at_once=max_at_once,
+                max_per_second=max_per_second,
+            )
 
-        if all_comments and more_comments:
-            while more_comments:
-                reqs = [
-                    partial(client.raw_get_more_comments, submission_id, mc["token"])
-                    for mc in more_comments
-                ]
-                aggr_res = await run_all(
-                    reqs,
-                    max_at_once=max_at_once,
-                    max_per_second=max_per_second,
-                )
+            # Yield comments
+            yield [c for res in aggr_res for c in res["comments"].values()]
 
-                # Yield comments
-                yield [c for res in aggr_res for c in res["comments"].values()]
-
-                # Extract more comments
-                more_comments = [
-                    comment
-                    for res in aggr_res
-                    for comment in res["moreComments"].values()
-                ]
+            # Extract more comments
+            more_comments = [
+                mc for res in aggr_res for mc in res["moreComments"].values()
+            ]
 
 
 async def get_pushshift_posts(

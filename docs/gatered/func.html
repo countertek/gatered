@@ -87,6 +87,7 @@ All functions are async and can be called directly without context manager.</p>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">get_post_comments</span><span class="p">(</span>
     <span class="n">submission_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">all_comments</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -95,10 +96,17 @@ All functions are async and can be called directly without context manager.</p>
 <span class="sd">    Provide `submission_id` (starts with `t3_`) and</span>
 <span class="sd">    if `all_comments` is `True`, it will fetch all the comments that are nested by reddit.</span>
 
+<span class="sd">    Provide `sort` as an option to sort the comments of the submission, default to `None` (best).</span>
+<span class="sd">    Available `sort` options: `top`, `new`, `controversial`, `old`, `qa`.</span>
+
 <span class="sd">    Returns a dict with `post` as dict and its `comments` as list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">Client</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_post_comments</span><span class="p">(</span><span class="n">submission_id</span><span class="p">,</span> <span class="n">all_comments</span><span class="o">=</span><span class="n">all_comments</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_post_comments</span><span class="p">(</span>
+            <span class="n">submission_id</span><span class="p">,</span>
+            <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+            <span class="n">all_comments</span><span class="o">=</span><span class="n">all_comments</span><span class="p">,</span>
+        <span class="p">)</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">get_posts_with_subreddit_info</span><span class="p">(</span>
@@ -220,13 +228,12 @@ All functions are async and can be called directly without context manager.</p>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">get_comments</span><span class="p">(</span>
     <span class="n">submission_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">all_comments</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">max_at_once</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
     <span class="n">max_per_second</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Async Generator to get comments batch by batch.</span>
+<span class="sd">    Async Generator to get all comments batch by batch.</span>
 
 <span class="sd">    Returns an async generator that yields a list of comments. Use `async for` loop to handle the results.</span>
 
@@ -235,12 +242,10 @@ All functions are async and can be called directly without context manager.</p>
 <span class="sd">    - `sort` (str):</span>
 <span class="sd">        Option to sort the comments of the submission, default to `None` (best).</span>
 <span class="sd">        Available options: `top`, `new`, `controversial`, `old`, `qa`.</span>
-<span class="sd">    - `all_comments` (bool):</span>
-<span class="sd">        Set this to `True` to also get all nested comments. Default to `False`.</span>
 <span class="sd">    - `max_at_once` (int):</span>
-<span class="sd">        Limits the maximum number of concurrently requests for fetching all comments. Default to 8.</span>
+<span class="sd">        Limits the maximum number of concurrently requests when fetching nested comments. Default to 8.</span>
 <span class="sd">    - `max_per_second` (int):</span>
-<span class="sd">        Limits the number of requests spawned per second. Default to 4.</span>
+<span class="sd">        Limits the number of requests spawned per second when fetching nested comments. Default to 4.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching comments from submission *</span><span class="si">{</span><span class="n">submission_id</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
 
@@ -249,28 +254,24 @@ All functions are async and can be called directly without context manager.</p>
         <span class="k">yield</span> <span class="nb">list</span><span class="p">(</span><span class="n">raw_json</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="n">more_comments</span> <span class="o">=</span> <span class="n">raw_json</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">more_comments</span><span class="p">:</span>
+            <span class="n">reqs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">partial</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">raw_get_more_comments</span><span class="p">,</span> <span class="n">submission_id</span><span class="p">,</span> <span class="n">mc</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">more_comments</span>
+            <span class="p">]</span>
+            <span class="n">aggr_res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_all</span><span class="p">(</span>
+                <span class="n">reqs</span><span class="p">,</span>
+                <span class="n">max_at_once</span><span class="o">=</span><span class="n">max_at_once</span><span class="p">,</span>
+                <span class="n">max_per_second</span><span class="o">=</span><span class="n">max_per_second</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">all_comments</span> <span class="ow">and</span> <span class="n">more_comments</span><span class="p">:</span>
-            <span class="k">while</span> <span class="n">more_comments</span><span class="p">:</span>
-                <span class="n">reqs</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">partial</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">raw_get_more_comments</span><span class="p">,</span> <span class="n">submission_id</span><span class="p">,</span> <span class="n">mc</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">])</span>
-                    <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">more_comments</span>
-                <span class="p">]</span>
-                <span class="n">aggr_res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_all</span><span class="p">(</span>
-                    <span class="n">reqs</span><span class="p">,</span>
-                    <span class="n">max_at_once</span><span class="o">=</span><span class="n">max_at_once</span><span class="p">,</span>
-                    <span class="n">max_per_second</span><span class="o">=</span><span class="n">max_per_second</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="c1"># Yield comments</span>
+            <span class="k">yield</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
-                <span class="c1"># Yield comments</span>
-                <span class="k">yield</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-
-                <span class="c1"># Extract more comments</span>
-                <span class="n">more_comments</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">comment</span>
-                    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span>
-                    <span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="p">]</span>
+            <span class="c1"># Extract more comments</span>
+            <span class="n">more_comments</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">mc</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">]</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">get_pushshift_posts</span><span class="p">(</span>
@@ -326,6 +327,7 @@ All functions are async and can be called directly without context manager.</p>
             <span class="name">get_post_comments</span><span class="signature">(
     submission_id: str,
     all_comments: bool = False,
+    sort: Union[str, NoneType] = None,
     httpx_options: Dict[str, Any] = {}
 )</span>:
     </div>
@@ -335,6 +337,7 @@ All functions are async and can be called directly without context manager.</p>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_post_comments</span><span class="p">(</span>
     <span class="n">submission_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">all_comments</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -343,10 +346,17 @@ All functions are async and can be called directly without context manager.</p>
 <span class="sd">    Provide `submission_id` (starts with `t3_`) and</span>
 <span class="sd">    if `all_comments` is `True`, it will fetch all the comments that are nested by reddit.</span>
 
+<span class="sd">    Provide `sort` as an option to sort the comments of the submission, default to `None` (best).</span>
+<span class="sd">    Available `sort` options: `top`, `new`, `controversial`, `old`, `qa`.</span>
+
 <span class="sd">    Returns a dict with `post` as dict and its `comments` as list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">Client</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_post_comments</span><span class="p">(</span><span class="n">submission_id</span><span class="p">,</span> <span class="n">all_comments</span><span class="o">=</span><span class="n">all_comments</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_post_comments</span><span class="p">(</span>
+            <span class="n">submission_id</span><span class="p">,</span>
+            <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+            <span class="n">all_comments</span><span class="o">=</span><span class="n">all_comments</span><span class="p">,</span>
+        <span class="p">)</span>
 </pre></div>
 
         </details>
@@ -355,6 +365,9 @@ All functions are async and can be called directly without context manager.</p>
 
 <p>Provide <code>submission_id</code> (starts with <code>t3_</code>) and
 if <code>all_comments</code> is <code>True</code>, it will fetch all the comments that are nested by reddit.</p>
+
+<p>Provide <code>sort</code> as an option to sort the comments of the submission, default to <code>None</code> (best).
+Available <code>sort</code> options: <code>top</code>, <code>new</code>, <code>controversial</code>, <code>old</code>, <code>qa</code>.</p>
 
 <p>Returns a dict with <code>post</code> as dict and its <code>comments</code> as list.</p>
 </div>
@@ -571,7 +584,6 @@ Set delay between each page request. Set 0 to disable it. Default to 0.5.</li>
             <span class="name">get_comments</span><span class="signature">(
     submission_id: str,
     sort: Union[str, NoneType] = None,
-    all_comments: bool = False,
     max_at_once: int = 8,
     max_per_second: int = 4,
     httpx_options: Dict[str, Any] = {}
@@ -583,13 +595,12 @@ Set delay between each page request. Set 0 to disable it. Default to 0.5.</li>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">get_comments</span><span class="p">(</span>
     <span class="n">submission_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">all_comments</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">max_at_once</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
     <span class="n">max_per_second</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
     <span class="n">httpx_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Async Generator to get comments batch by batch.</span>
+<span class="sd">    Async Generator to get all comments batch by batch.</span>
 
 <span class="sd">    Returns an async generator that yields a list of comments. Use `async for` loop to handle the results.</span>
 
@@ -598,12 +609,10 @@ Set delay between each page request. Set 0 to disable it. Default to 0.5.</li>
 <span class="sd">    - `sort` (str):</span>
 <span class="sd">        Option to sort the comments of the submission, default to `None` (best).</span>
 <span class="sd">        Available options: `top`, `new`, `controversial`, `old`, `qa`.</span>
-<span class="sd">    - `all_comments` (bool):</span>
-<span class="sd">        Set this to `True` to also get all nested comments. Default to `False`.</span>
 <span class="sd">    - `max_at_once` (int):</span>
-<span class="sd">        Limits the maximum number of concurrently requests for fetching all comments. Default to 8.</span>
+<span class="sd">        Limits the maximum number of concurrently requests when fetching nested comments. Default to 8.</span>
 <span class="sd">    - `max_per_second` (int):</span>
-<span class="sd">        Limits the number of requests spawned per second. Default to 4.</span>
+<span class="sd">        Limits the number of requests spawned per second when fetching nested comments. Default to 4.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching comments from submission *</span><span class="si">{</span><span class="n">submission_id</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">)</span>
 
@@ -612,33 +621,29 @@ Set delay between each page request. Set 0 to disable it. Default to 0.5.</li>
         <span class="k">yield</span> <span class="nb">list</span><span class="p">(</span><span class="n">raw_json</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
         <span class="n">more_comments</span> <span class="o">=</span> <span class="n">raw_json</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">more_comments</span><span class="p">:</span>
+            <span class="n">reqs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">partial</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">raw_get_more_comments</span><span class="p">,</span> <span class="n">submission_id</span><span class="p">,</span> <span class="n">mc</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">more_comments</span>
+            <span class="p">]</span>
+            <span class="n">aggr_res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_all</span><span class="p">(</span>
+                <span class="n">reqs</span><span class="p">,</span>
+                <span class="n">max_at_once</span><span class="o">=</span><span class="n">max_at_once</span><span class="p">,</span>
+                <span class="n">max_per_second</span><span class="o">=</span><span class="n">max_per_second</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">all_comments</span> <span class="ow">and</span> <span class="n">more_comments</span><span class="p">:</span>
-            <span class="k">while</span> <span class="n">more_comments</span><span class="p">:</span>
-                <span class="n">reqs</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">partial</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">raw_get_more_comments</span><span class="p">,</span> <span class="n">submission_id</span><span class="p">,</span> <span class="n">mc</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">])</span>
-                    <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">more_comments</span>
-                <span class="p">]</span>
-                <span class="n">aggr_res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_all</span><span class="p">(</span>
-                    <span class="n">reqs</span><span class="p">,</span>
-                    <span class="n">max_at_once</span><span class="o">=</span><span class="n">max_at_once</span><span class="p">,</span>
-                    <span class="n">max_per_second</span><span class="o">=</span><span class="n">max_per_second</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="c1"># Yield comments</span>
+            <span class="k">yield</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
-                <span class="c1"># Yield comments</span>
-                <span class="k">yield</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-
-                <span class="c1"># Extract more comments</span>
-                <span class="n">more_comments</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">comment</span>
-                    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span>
-                    <span class="k">for</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-                <span class="p">]</span>
+            <span class="c1"># Extract more comments</span>
+            <span class="n">more_comments</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">mc</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">aggr_res</span> <span class="k">for</span> <span class="n">mc</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;moreComments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="p">]</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Async Generator to get comments batch by batch.</p>
+            <div class="docstring"><p>Async Generator to get all comments batch by batch.</p>
 
 <p>Returns an async generator that yields a list of comments. Use <code>async for</code> loop to handle the results.</p>
 
@@ -648,12 +653,10 @@ The Submission id (starts with <code>t3_</code>).</li>
 <li><code>sort</code> (str):
 Option to sort the comments of the submission, default to <code>None</code> (best).
 Available options: <code>top</code>, <code>new</code>, <code>controversial</code>, <code>old</code>, <code>qa</code>.</li>
-<li><code>all_comments</code> (bool):
-Set this to <code>True</code> to also get all nested comments. Default to <code>False</code>.</li>
 <li><code>max_at_once</code> (int):
-Limits the maximum number of concurrently requests for fetching all comments. Default to 8.</li>
+Limits the maximum number of concurrently requests when fetching nested comments. Default to 8.</li>
 <li><code>max_per_second</code> (int):
-Limits the number of requests spawned per second. Default to 4.</li>
+Limits the number of requests spawned per second when fetching nested comments. Default to 4.</li>
 </ul>
 </div>
 

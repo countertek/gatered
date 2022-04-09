@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1](https://github.com/countertek/gatered/v1.3.1) (2022-04-09)
+
+### Fixes
+
+- Add socks proxy support in httpx
+
 ## [1.3.0](https://github.com/countertek/gatered/v1.3.0) (2022-03-23)
 
 ### Features
